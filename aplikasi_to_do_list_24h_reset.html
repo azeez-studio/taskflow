@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List 24h Reset & AI Motivator</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;1,500&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #140d09;
+            background-image: 
+                radial-gradient(circle at 15% 20%, rgba(88, 52, 28, 0.25) 0%, transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(61, 35, 18, 0.3) 0%, transparent 45%);
+            color: #f3e8d7;
+            min-height: 100vh;
+        }
+
+        /* Glassmorphism Dark Wood Card */
+        .wood-card {
+            background: rgba(36, 24, 16, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(139, 90, 43, 0.25);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Floating Animated Parchment Paper */
+        .paper-container {
+            background: #f5ebe0;
+            background-image: 
+                radial-gradient(#d6c5b3 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.6), rgba(245,235,224,0.9));
+            background-size: 16px 16px, 100% 100%;
+            color: #2c1a0e;
+            box-shadow: 0 16px 35px -8px rgba(0, 0, 0, 0.7), 0 0 15px rgba(180, 130, 80, 0.2);
+            animation: floatPaper 6s ease-in-out infinite;
+        }
+
+        @keyframes floatPaper {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-6px) rotate(0.5deg); }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(20, 13, 9, 0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #5c3c23;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5a2b;
+        }
+
+        /* Checkbox Custom Styles */
+        .custom-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 2px solid #3b82f6;
+            border-radius: 0.375rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: grid;
+            place-content: center;
+        }
+
+        .custom-checkbox:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+            box-shadow: 0 0 10px rgba(37, 99, 235, 0.5);
+        }
+
+        .custom-checkbox:checked::before {
+            content: "\f00c";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: white;
+            font-size: 0.75rem;
+        }
+
+        .font-serif-quote {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+    </style>
+    <!-- Dynamic Theme Customizer Styles -->
+    <style id="dynamicThemeStyles"></style>
+</head>
+<body class="flex flex-col min-h-screen pb-12 transition-colors duration-500">
+
+    <!-- Header -->
+    <header class="wood-card sticky top-0 z-30 border-b border-amber-900/30 px-4 py-4 mb-6">
+        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-700 to-amber-950 flex items-center justify-center border border-amber-500/30 shadow-md">
+                    <i class="fa-solid fa-square-check text-blue-400 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold text-amber-100 tracking-wide flex items-center gap-2">
+                        TaskFlow <span class="text-xs px-2 py-0.5 rounded-full bg-amber-900/60 text-amber-300 border border-amber-700/40">Reset Centang 24j</span>
+                    </h1>
+                    <p class="text-xs text-amber-200/60">Daftar kegiatan tetap tersimpan, centang di-reset otomatis</p>
+                </div>
+            </div>
+
+            <!-- Controls & Countdown -->
+            <div class="flex items-center gap-3">
+                <!-- 24h Countdown Widget -->
+                <div class="flex items-center gap-2.5 bg-amber-950/80 border border-amber-800/40 rounded-xl px-3.5 py-1.5 shadow-inner">
+                    <i class="fa-regular fa-clock text-amber-400 text-sm animate-pulse"></i>
+                    <div>
+                        <div class="text-[9px] uppercase tracking-wider text-amber-300/70 font-semibold">Reset Centang Dalam</div>
+                        <div id="countdownTimer" class="text-sm font-mono font-bold text-amber-200">24:00:00</div>
+                    </div>
+                    <button onclick="openResetModal()" title="Reset Status Centang Sekarang (Daftar Kegiatan Tetap Ada)" class="ml-1 p-1.5 text-amber-400 hover:text-amber-200 hover:bg-amber-900/50 rounded-lg transition-colors">
+                        <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                    </button>
+                </div>
+
+                <!-- Sound Toggle Button -->
+                <button id="soundToggleBtn" onclick="toggleSound()" class="p-2.5 bg-amber-900/40 border border-amber-800/40 rounded-xl text-amber-300 hover:bg-amber-800/40 transition-colors" title="Beralih Suara Ceklis">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-sm"></i>
+                </button>
+
+                <!-- Theme Palette Button -->
+                <button id="themeToggleBtn" onclick="openThemeModal()" class="p-2.5 bg-amber-900/40 border border-amber-800/40 rounded-xl text-amber-300 hover:bg-amber-800/40 transition-colors flex items-center gap-1.5" title="Ganti Tema & Warna">
+                    <i class="fa-solid fa-palette text-sm"></i>
+                    <span class="text-xs font-medium hidden sm:inline">Tema</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-6xl mx-auto px-4 w-full grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        
+        <!-- LEFT COLUMN: Tasks & Tabs (2 Columns on Large Screens) -->
+        <section class="lg:col-span-2 space-y-5">
+            
+            <!-- Tab Navigation Bar -->
+            <div class="wood-card rounded-2xl p-2 flex items-center justify-between gap-2 overflow-x-auto">
+                <div id="tabsContainer" class="flex items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0 w-full">
+                    <!-- Tabs rendered via JS -->
+                </div>
+                <button onclick="openAddTabModal()" class="shrink-0 px-3 py-1.5 bg-amber-800/40 hover:bg-amber-700/50 text-amber-200 text-xs font-medium rounded-xl border border-amber-600/30 transition-all flex items-center gap-1.5 whitespace-nowrap">
+                    <i class="fa-solid fa-plus text-[10px]"></i> Tab Baru
+                </button>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="wood-card rounded-xl p-3 text-center border-l-4 border-l-amber-600">
+                    <div class="text-[11px] text-amber-200/60 uppercase font-semibold">Total Tugas</div>
+                    <div id="statTotal" class="text-xl font-bold text-amber-100">0</div>
+                </div>
+                <div class="wood-card rounded-xl p-3 text-center border-l-4 border-l-blue-500">
+                    <div class="text-[11px] text-blue-300/70 uppercase font-semibold">Selesai</div>
+                    <div id="statCompleted" class="text-xl font-bold text-blue-400">0</div>
+                </div>
+                <div class="wood-card rounded-xl p-3 text-center border-l-4 border-l-amber-700">
+                    <div class="text-[11px] text-amber-200/60 uppercase font-semibold">Pending</div>
+                    <div id="statPending" class="text-xl font-bold text-amber-300">0</div>
+                </div>
+            </div>
+
+            <!-- Input Form Box -->
+            <div class="wood-card rounded-2xl p-4 space-y-3">
+                <form id="taskForm" onsubmit="handleAddTask(event)" class="flex flex-col sm:flex-row gap-2.5">
+                    <div class="relative flex-1">
+                        <input type="text" id="taskInput" placeholder="Tuliskan rencana tugas baru Anda..." required
+                            class="w-full bg-amber-950/60 border border-amber-800/40 rounded-xl px-4 py-2.5 text-sm text-amber-100 placeholder-amber-200/30 focus:outline-none focus:border-amber-500 transition-colors">
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="prioritySelect" class="bg-amber-950/60 border border-amber-800/40 rounded-xl px-3 py-2.5 text-xs text-amber-200 focus:outline-none focus:border-amber-500">
+                            <option value="normal">Biasa</option>
+                            <option value="high">Penting 🔥</option>
+                        </select>
+                        <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-medium text-sm rounded-xl shadow-lg shadow-blue-900/30 transition-all flex items-center gap-2 whitespace-nowrap">
+                            <i class="fa-solid fa-plus text-xs"></i> Tambah
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Task List Container -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between px-1">
+                    <h2 class="text-sm font-semibold text-amber-200/80 flex items-center gap-2">
+                        <i class="fa-solid fa-list-check text-amber-500"></i> Daftar Kegiatan
+                    </h2>
+                    <span id="activeTabLabel" class="text-xs text-amber-200/50 italic">Tab: Semua</span>
+                </div>
+
+                <div id="taskList" class="space-y-2.5 min-h-[160px]">
+                    <!-- Dynamic tasks will be inserted here -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- RIGHT COLUMN: AI Auto Generated Motivation (Floating Parchment Paper) -->
+        <aside class="lg:col-span-1 w-full space-y-4">
+            
+            <!-- Floating Paper Outer Container -->
+            <div class="relative pt-3">
+                
+                <!-- Hiasan Jepit / Clip Atas -->
+                <div class="absolute top-0 left-1/2 -translate-x-1/2 z-20 w-16 h-4 bg-amber-900 rounded-full border border-amber-600/50 shadow-md flex items-center justify-center pointer-events-none">
+                    <div class="w-8 h-1 bg-amber-400/80 rounded-full"></div>
+                </div>
+
+                <!-- Animated Paper Card -->
+                <div class="paper-container relative z-10 rounded-2xl p-5 border-2 border-amber-800/20 flex flex-col justify-between min-h-[340px]">
+                    
+                    <!-- Paper Header -->
+                    <div>
+                        <div class="flex items-center justify-between border-b border-stone-400/30 pb-3 mb-3">
+                            <div class="flex items-center gap-2">
+                                <i class="fa-solid fa-quote-left text-amber-800 text-sm"></i>
+                                <span class="text-xs font-bold uppercase tracking-wider text-amber-900">Motivasi Kerja AI</span>
+                            </div>
+                            <span class="text-[10px] bg-amber-200/80 text-amber-900 px-2 py-0.5 rounded-full font-semibold border border-amber-400/50">Gemini AI</span>
+                        </div>
+
+                        <!-- Filter Kategori Motivasi Cepat -->
+                        <div class="flex flex-wrap gap-1.5 mb-4">
+                            <button onclick="generateAIQuote('fokus')" class="px-2.5 py-1 text-[11px] bg-amber-900/10 hover:bg-amber-900/20 text-amber-900 rounded-lg border border-amber-800/20 transition-all font-medium">🎯 Fokus</button>
+                            <button onclick="generateAIQuote('tangguh')" class="px-2.5 py-1 text-[11px] bg-amber-900/10 hover:bg-amber-900/20 text-amber-900 rounded-lg border border-amber-800/20 transition-all font-medium">💪 Tangguh</button>
+                            <button onclick="generateAIQuote('karir')" class="px-2.5 py-1 text-[11px] bg-amber-900/10 hover:bg-amber-900/20 text-amber-900 rounded-lg border border-amber-800/20 transition-all font-medium">🚀 Karir</button>
+                        </div>
+
+                        <!-- Quote Display Area (Medium Size Text) -->
+                        <div class="relative min-h-[140px] flex items-center justify-center my-2 p-2">
+                            <!-- Loading Spinner -->
+                            <div id="quoteLoader" class="hidden text-center py-4">
+                                <i class="fa-solid fa-spinner fa-spin text-amber-800 text-2xl mb-2"></i>
+                                <p class="text-xs text-stone-600 font-medium">Merangkai kata motivasi...</p>
+                            </div>
+
+                            <!-- Text Content -->
+                            <div id="quoteBox" class="text-center space-y-3">
+                                <p id="quoteText" class="text-base md:text-lg font-semibold not-italic text-stone-800 leading-relaxed">
+                                    "Keberhasilan adalah hasil dari kesempurnaan, kerja keras, belajar dari pengalaman, dan kesetiaan."
+                                </p>
+                                <p id="quoteAuthor" class="text-xs font-bold text-amber-900/80 tracking-wide">
+                                    — Colin Powell
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Footer -->
+                    <div class="pt-3 border-t border-stone-400/30 flex items-center justify-between gap-2">
+                        <button onclick="copyQuote()" class="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-300/40 rounded-lg transition-colors text-xs flex items-center gap-1.5" title="Salin Motivasi">
+                            <i class="fa-regular fa-copy"></i>
+                            <span class="text-[11px]">Salin</span>
+                        </button>
+                        <button onclick="generateAIQuote()" class="px-3.5 py-2 bg-amber-900 hover:bg-amber-800 text-amber-50 text-xs font-medium rounded-xl shadow transition-all flex items-center gap-1.5">
+                            <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i> Auto Generate
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+        </aside>
+    </main>
+
+    <!-- Custom Modal: Tambah Tab Baru -->
+    <div id="addTabModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="wood-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-amber-700/40 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-amber-800/30 pb-2">
+                <h3 class="text-base font-bold text-amber-100 flex items-center gap-2">
+                    <i class="fa-solid fa-folder-plus text-amber-500"></i> Buat Tab Baru
+                </h3>
+                <button onclick="closeAddTabModal()" class="text-amber-200/50 hover:text-amber-100"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-amber-200/70 mb-1.5">Nama Tab Kustom</label>
+                <input type="text" id="newTabInput" placeholder="Contoh: Belanja, Proyek A..." 
+                    class="w-full bg-amber-950/80 border border-amber-800/50 rounded-xl px-3.5 py-2 text-sm text-amber-100 placeholder-amber-200/30 focus:outline-none focus:border-amber-500">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeAddTabModal()" class="px-3.5 py-2 bg-amber-950 hover:bg-amber-900 text-amber-300 text-xs font-medium rounded-xl border border-amber-800/40">Batal</button>
+                <button onclick="confirmAddTab()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-xl shadow">Simpan Tab</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal: Reset Confirmation -->
+    <div id="resetModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="wood-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-amber-700/40 shadow-2xl text-center">
+            <div class="w-12 h-12 rounded-full bg-amber-950/80 border border-amber-600/40 text-amber-400 flex items-center justify-center mx-auto text-xl">
+                <i class="fa-solid fa-arrows-rotate"></i>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-amber-100">Reset Status Centang?</h3>
+                <p class="text-xs text-amber-200/60 mt-1">Semua status centang selesai akan di-reset. <strong class="text-amber-300">Daftar kegiatan Anda akan tetap utuh</strong> untuk dikerjakan kembali.</p>
+            </div>
+            <div class="flex justify-center gap-2 pt-2">
+                <button onclick="closeResetModal()" class="px-4 py-2 bg-amber-950 hover:bg-amber-900 text-amber-300 text-xs font-medium rounded-xl border border-amber-800/40">Batal</button>
+                <button onclick="confirmReset()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-xl shadow">Reset Centang</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal: Edit Rencana Tugas -->
+    <div id="editTaskModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="wood-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-amber-700/40 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-amber-800/30 pb-2">
+                <h3 class="text-base font-bold text-amber-100 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-amber-500"></i> Ubah Nama Tugas
+                </h3>
+                <button onclick="closeEditTaskModal()" class="text-amber-200/50 hover:text-amber-100"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-amber-200/70 mb-1.5">Nama Rencana Tugas Baru</label>
+                <input type="text" id="editTaskInput" placeholder="Tuliskan nama tugas baru..." 
+                    class="w-full bg-amber-950/80 border border-amber-800/50 rounded-xl px-3.5 py-2 text-sm text-amber-100 placeholder-amber-200/30 focus:outline-none focus:border-amber-500"
+                    onkeydown="if(event.key === 'Enter') confirmEditTask()">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeEditTaskModal()" class="px-3.5 py-2 bg-amber-950 hover:bg-amber-900 text-amber-300 text-xs font-medium rounded-xl border border-amber-800/40">Batal</button>
+                <button onclick="confirmEditTask()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-xl shadow">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal: Ubah Nama Tab -->
+    <div id="editTabModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="wood-card rounded-2xl max-w-sm w-full p-5 space-y-4 border border-amber-700/40 shadow-2xl">
+            <div class="flex items-center justify-between border-b border-amber-800/30 pb-2">
+                <h3 class="text-base font-bold text-amber-100 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square text-amber-500"></i> Ubah Nama Tab
+                </h3>
+                <button onclick="closeEditTabModal()" class="text-amber-200/50 hover:text-amber-100"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-amber-200/70 mb-1.5">Nama Tab Baru</label>
+                <input type="text" id="editTabInput" placeholder="Tuliskan nama tab baru..." 
+                    class="w-full bg-amber-950/80 border border-amber-800/50 rounded-xl px-3.5 py-2 text-sm text-amber-100 placeholder-amber-200/30 focus:outline-none focus:border-amber-500"
+                    onkeydown="if(event.key === 'Enter') confirmEditTab()">
+            </div>
+            <div class="flex justify-end gap-2 pt-2">
+                <button onclick="closeEditTabModal()" class="px-3.5 py-2 bg-amber-950 hover:bg-amber-900 text-amber-300 text-xs font-medium rounded-xl border border-amber-800/40">Batal</button>
+                <button onclick="confirmEditTab()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium rounded-xl shadow">Simpan Tab</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal: Ganti Tema & Upload Gambar -->
+    <div id="themeModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="wood-card rounded-2xl max-w-lg w-full p-5 space-y-5 border border-amber-700/40 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-amber-800/30 pb-3">
+                <h3 class="text-base font-bold text-amber-100 flex items-center gap-2">
+                    <i class="fa-solid fa-palette text-amber-400"></i> Pengaturan Tema & Tampilan
+                </h3>
+                <button onclick="closeThemeModal()" class="text-amber-200/50 hover:text-amber-100 p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <!-- Section 1: Upload Latar Belakang dari HP/Perangkat -->
+            <div class="space-y-3 bg-amber-950/40 p-4 rounded-xl border border-amber-800/30">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-amber-200 uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-up text-amber-400"></i> Latar Belakang Perangkat (Upload)
+                    </h4>
+                    <span class="text-[10px] text-amber-300/60">JPG, PNG, WebP</span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                    <label class="w-full sm:w-auto flex-1 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 bg-gradient-to-r from-amber-800/60 to-amber-900/60 hover:from-amber-700/80 hover:to-amber-800/80 border border-amber-600/40 rounded-xl text-xs font-semibold text-amber-100 shadow transition-all">
+                        <i class="fa-solid fa-image text-sm text-amber-300"></i>
+                        <span>Pilih Gambar dari Perangkat</span>
+                        <input type="file" id="customBgInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    </label>
+
+                    <button id="removeBgBtn" onclick="removeCustomBg()" class="hidden px-3.5 py-3 bg-red-950/60 hover:bg-red-900/80 text-red-200 text-xs font-medium rounded-xl border border-red-800/40 transition-colors whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-trash-can text-xs"></i> Hapus Foto
+                    </button>
+                </div>
+
+                <!-- Preview Uploaded Image & Overlay Intensity -->
+                <div id="customBgPreviewArea" class="hidden pt-2 space-y-2">
+                    <div class="relative w-full h-24 rounded-lg overflow-hidden border border-amber-600/30 shadow-inner">
+                        <img id="customBgPreview" src="" alt="Preview Latar Kustom" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center">
+                            <span class="text-[11px] bg-black/60 text-amber-200 px-2.5 py-1 rounded-full font-medium border border-amber-500/30">Aktif Digunakan</span>
+                        </div>
+                    </div>
+                    <!-- Overlay Brightness Controller -->
+                    <div class="flex items-center gap-3 bg-amber-950/80 p-2.5 rounded-lg border border-amber-900/50">
+                        <span class="text-[11px] font-medium text-amber-200/80 shrink-0">Kegelapan Lapisan:</span>
+                        <input type="range" id="overlayRange" min="0.1" max="0.85" step="0.05" value="0.45" oninput="updateBgOverlay(this.value)" class="w-full accent-amber-500 cursor-pointer">
+                        <span id="overlayValText" class="text-[11px] font-mono text-amber-300 w-8 text-right">45%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Section 2: Preset Warna Tema Sistem -->
+            <div class="space-y-3">
+                <h4 class="text-xs font-bold text-amber-200 uppercase tracking-wider flex items-center gap-1.5">
+                    <i class="fa-solid fa-swatchbook text-amber-400"></i> Warna Tema Sistem
+                </h4>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5" id="themePresetsGrid">
+                    <!-- Preset buttons dynamic -->
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2 border-t border-amber-800/30">
+                <button onclick="closeThemeModal()" class="px-5 py-2 bg-amber-800 hover:bg-amber-700 text-amber-50 text-xs font-medium rounded-xl shadow transition-all">Selesai</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-amber-900 text-amber-100 px-4 py-2.5 rounded-xl border border-amber-600/40 shadow-2xl text-xs flex items-center gap-2 pointer-events-none">
+        <i id="toastIcon" class="fa-solid fa-circle-check text-blue-400"></i>
+        <span id="toastMsg">Pesan Notifikasi</span>
+    </div>
+
+    <script>
+        // Default Local Storage Keys & State
+        const STORAGE_KEY = 'taskflow_24h_data_v3';
+        
+        let state = {
+            tasks: [],
+            tabs: ['Semua', 'Harian', 'Pekerjaan', 'Pribadi'],
+            activeTab: 'Semua',
+            lastResetTimestamp: Date.now(),
+            soundEnabled: true,
+            theme: 'wood', // 'wood', 'sapphire', 'emerald', 'violet', 'sunset', 'light', 'custom'
+            customBg: null, // Base64 compressed image data
+            overlayOpacity: 0.45 // Overlay opacity for custom wallpaper
+        };
+
+        // Presets theme palette configurations
+        const THEMES = {
+            wood: {
+                name: 'Dark Wood',
+                icon: 'fa-tree',
+                bgCss: 'background-color: #140d09; background-image: radial-gradient(circle at 15% 20%, rgba(88, 52, 28, 0.25) 0%, transparent 40%), radial-gradient(circle at 85% 80%, rgba(61, 35, 18, 0.3) 0%, transparent 45%); color: #f3e8d7;',
+                cardBg: 'rgba(36, 24, 16, 0.85)',
+                cardBorder: 'rgba(139, 90, 43, 0.25)',
+                previewBg: 'linear-gradient(135deg, #140d09, #3d2312)'
+            },
+            sapphire: {
+                name: 'Midnight Sapphire',
+                icon: 'fa-gem',
+                bgCss: 'background-color: #0b132b; background-image: radial-gradient(circle at 20% 20%, rgba(28, 37, 65, 0.6) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(58, 80, 107, 0.4) 0%, transparent 50%); color: #e0f2fe;',
+                cardBg: 'rgba(11, 19, 43, 0.85)',
+                cardBorder: 'rgba(56, 189, 248, 0.25)',
+                previewBg: 'linear-gradient(135deg, #0b132b, #1c2541)'
+            },
+            emerald: {
+                name: 'Emerald Forest',
+                icon: 'fa-leaf',
+                bgCss: 'background-color: #06231c; background-image: radial-gradient(circle at 15% 25%, rgba(16, 185, 129, 0.2) 0%, transparent 45%), radial-gradient(circle at 85% 75%, rgba(4, 120, 87, 0.3) 0%, transparent 50%); color: #ecfdf5;',
+                cardBg: 'rgba(6, 35, 28, 0.85)',
+                cardBorder: 'rgba(16, 185, 129, 0.25)',
+                previewBg: 'linear-gradient(135deg, #06231c, #047857)'
+            },
+            violet: {
+                name: 'Cyber Violet',
+                icon: 'fa-bolt',
+                bgCss: 'background-color: #170d2c; background-image: radial-gradient(circle at 20% 20%, rgba(124, 58, 237, 0.3) 0%, transparent 45%), radial-gradient(circle at 80% 80%, rgba(219, 39, 119, 0.25) 0%, transparent 50%); color: #f5f3ff;',
+                cardBg: 'rgba(23, 13, 44, 0.85)',
+                cardBorder: 'rgba(139, 92, 246, 0.25)',
+                previewBg: 'linear-gradient(135deg, #170d2c, #4c1d95)'
+            },
+            sunset: {
+                name: 'Warm Sunset',
+                icon: 'fa-sun',
+                bgCss: 'background-color: #2a100d; background-image: radial-gradient(circle at 20% 20%, rgba(239, 68, 68, 0.25) 0%, transparent 45%), radial-gradient(circle at 80% 80%, rgba(245, 158, 11, 0.25) 0%, transparent 50%); color: #fff7ed;',
+                cardBg: 'rgba(42, 16, 13, 0.85)',
+                cardBorder: 'rgba(245, 158, 11, 0.25)',
+                previewBg: 'linear-gradient(135deg, #2a100d, #78350f)'
+            },
+            rainbow: {
+                name: 'Pelangi Ceria',
+                icon: 'fa-rainbow',
+                bgCss: 'background-color: #0d0b18; background-image: radial-gradient(circle at 10% 10%, rgba(255, 0, 128, 0.3) 0%, transparent 40%), radial-gradient(circle at 90% 10%, rgba(255, 165, 0, 0.3) 0%, transparent 40%), radial-gradient(circle at 50% 50%, rgba(0, 230, 118, 0.25) 0%, transparent 45%), radial-gradient(circle at 10% 90%, rgba(0, 184, 212, 0.3) 0%, transparent 40%), radial-gradient(circle at 90% 90%, rgba(170, 0, 255, 0.3) 0%, transparent 40%); color: #f8fafc;',
+                cardBg: 'rgba(20, 16, 38, 0.85)',
+                cardBorder: 'rgba(255, 255, 255, 0.2)',
+                previewBg: 'linear-gradient(135deg, #ff007f, #ffaa00, #00e676, #00b8d4, #aa00ff)'
+            }
+        };
+
+        let editingTaskId = null;
+        let editingTabName = null;
+
+        // Fallback Motivation Quotes Array
+        const fallbackQuotes = [
+            { text: "Cara terbaik untuk memulai adalah dengan berhenti berbicara dan mulai melakukan.", author: "Walt Disney" },
+            { text: "Jangan menunggu kesempatan tiba. Ciptakanlah kesempatan itu sendiri.", author: "George Bernard Shaw" },
+            { text: "Masa depan tergantung pada apa yang Anda lakukan hari ini.", author: "Mahatma Gandhi" },
+            { text: "Fokus pada prosesnya, bukan hanya pada hasil akhirnya.", author: "Motivator Kerja" },
+            { text: "Kesuksesan kecil setiap hari akan berakumulasi menjadi pencapaian luar biasa.", author: "Robin Sharma" },
+            { text: "Tantangan adalah hal yang membuat hidup menarik. Mengatasinya adalah hal yang membuat hidup berarti.", author: "Joshua J. Marine" },
+            { text: "Kualitas kerja Anda mencerminkan komitmen pribadi Anda terhadap keunggulan.", author: "Vince Lombardi" }
+        ];
+
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            return audioCtx;
+        }
+
+        function playCheckSound() {
+            if (!state.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
+
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12); // G5
+
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } catch (e) {
+                console.log('Audio Context Error:', e);
+            }
+        }
+
+        function playUncheckSound() {
+            if (!state.soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                if (ctx.state === 'suspended') ctx.resume();
+
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(392.00, now); // G4
+                osc.frequency.exponentialRampToValueAtTime(261.63, now + 0.1); // C4
+
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.18);
+            } catch (e) {
+                console.log('Audio Context Error:', e);
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            saveState();
+            updateSoundIcon();
+            showToast(state.soundEnabled ? 'Efek suara aktif' : 'Efek suara dinonaktifkan', 'fa-volume-high');
+        }
+
+        function updateSoundIcon() {
+            const btn = document.getElementById('soundToggleBtn');
+            const icon = document.getElementById('soundIcon');
+            if (state.soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-sm';
+                btn.className = 'p-2.5 bg-amber-900/40 border border-amber-800/40 rounded-xl text-amber-300 hover:bg-amber-800/40 transition-colors';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-sm';
+                btn.className = 'p-2.5 bg-amber-950/60 border border-amber-900/40 rounded-xl text-amber-200/40 hover:bg-amber-900/40 transition-colors';
+            }
+        }
+
+        window.onload = function() {
+            loadState();
+            applyTheme();
+            check24hReset();
+            startCountdown();
+            renderTabs();
+            renderTasks();
+            updateSoundIcon();
+        };
+
+        function saveState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                } catch (e) {
+                    console.error('Failed parsing state', e);
+                }
+            } else {
+                // Initial Tasks (Kosong)
+                state.tasks = [];
+                saveState();
+            }
+        }
+
+        /* --- THEME MANAGER & CUSTOM WALLPAPER FUNCTIONS --- */
+
+        function applyTheme() {
+            const styleElem = document.getElementById('dynamicThemeStyles');
+            
+            if (state.theme === 'custom' && state.customBg) {
+                // Apply custom user-uploaded background image
+                const opacity = state.overlayOpacity || 0.45;
+                document.body.style.cssText = `
+                    background-image: linear-gradient(rgba(0,0,0,${opacity}), rgba(0,0,0,${opacity})), url('${state.customBg}');
+                    background-size: cover;
+                    background-position: center;
+                    background-attachment: fixed;
+                    color: #f8fafc;
+                `;
+                
+                styleElem.innerHTML = `
+                    .wood-card {
+                        background: rgba(15, 23, 42, 0.82) !important;
+                        backdrop-filter: blur(14px) !important;
+                        border: 1px solid rgba(255, 255, 255, 0.18) !important;
+                    }
+                `;
+            } else {
+                // Apply system theme preset
+                const themeKey = THEMES[state.theme] ? state.theme : 'wood';
+                const themeObj = THEMES[themeKey];
+                
+                document.body.style.cssText = themeObj.bgCss;
+                
+                if (themeKey === 'rainbow') {
+                    styleElem.innerHTML = `
+                        .wood-card {
+                            background: ${themeObj.cardBg} !important;
+                            backdrop-filter: blur(14px) !important;
+                            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(255, 0, 128, 0.15) !important;
+                        }
+                    `;
+                } else {
+                    styleElem.innerHTML = `
+                        .wood-card {
+                            background: ${themeObj.cardBg} !important;
+                            backdrop-filter: blur(12px) !important;
+                            border: 1px solid ${themeObj.cardBorder} !important;
+                        }
+                    `;
+                }
+            }
+        }
+
+        function openThemeModal() {
+            renderThemeModalContent();
+            document.getElementById('themeModal').classList.remove('hidden');
+        }
+
+        function closeThemeModal() {
+            document.getElementById('themeModal').classList.add('hidden');
+        }
+
+        function renderThemeModalContent() {
+            const grid = document.getElementById('themePresetsGrid');
+            grid.innerHTML = '';
+
+            Object.keys(THEMES).forEach(key => {
+                const theme = THEMES[key];
+                const isSelected = state.theme === key;
+                
+                const card = document.createElement('div');
+                card.onclick = () => selectThemePreset(key);
+                card.className = `p-3 rounded-xl border cursor-pointer transition-all flex flex-col justify-between h-20 relative overflow-hidden ${
+                    isSelected 
+                        ? 'border-amber-400 ring-2 ring-amber-500/50 shadow-lg scale-[1.02]' 
+                        : 'border-amber-800/40 hover:border-amber-600/60 hover:scale-[1.01]'
+                }`;
+                card.style.background = theme.previewBg;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between text-xs font-bold text-white drop-shadow">
+                        <span><i class="fa-solid ${theme.icon} mr-1 text-amber-300"></i> ${escapeHtml(theme.name)}</span>
+                        ${isSelected ? '<i class="fa-solid fa-circle-check text-amber-400 text-sm"></i>' : ''}
+                    </div>
+                    <div class="text-[9px] text-white/80 font-medium">Preset Warna</div>
+                `;
+                grid.appendChild(card);
+            });
+
+            // Handle Custom Wallpaper Preview UI inside modal
+            const previewArea = document.getElementById('customBgPreviewArea');
+            const previewImg = document.getElementById('customBgPreview');
+            const removeBtn = document.getElementById('removeBgBtn');
+            const overlayRange = document.getElementById('overlayRange');
+            const overlayValText = document.getElementById('overlayValText');
+
+            if (state.customBg) {
+                previewArea.classList.remove('hidden');
+                removeBtn.classList.remove('hidden');
+                previewImg.src = state.customBg;
+                overlayRange.value = state.overlayOpacity || 0.45;
+                overlayValText.innerText = `${Math.round((state.overlayOpacity || 0.45) * 100)}%`;
+            } else {
+                previewArea.classList.add('hidden');
+                removeBtn.classList.add('hidden');
+            }
+        }
+
+        function selectThemePreset(themeKey) {
+            state.theme = themeKey;
+            saveState();
+            applyTheme();
+            renderThemeModalContent();
+            showToast(`Tema "${THEMES[themeKey].name}" diterapkan!`, 'fa-palette');
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showToast('Mohon pilih file gambar yang valid', 'fa-triangle-exclamation');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    // Compress Image on Canvas to prevent exceeding localStorage memory limit
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 1200;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxDim || height > maxDim) {
+                        if (width > height) {
+                            height = Math.round((height * maxDim) / width);
+                            width = maxDim;
+                        } else {
+                            width = Math.round((width * maxDim) / height);
+                            height = maxDim;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    // Convert to base64 JPG with 0.8 quality
+                    const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.82);
+                    
+                    state.customBg = compressedDataUrl;
+                    state.theme = 'custom';
+                    saveState();
+                    applyTheme();
+                    renderThemeModalContent();
+                    showToast('Latar belakang kustom dari perangkat berhasil diterapkan!', 'fa-image');
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+            e.target.value = ''; // Reset input
+        }
+
+        function removeCustomBg() {
+            state.customBg = null;
+            state.theme = 'wood';
+            saveState();
+            applyTheme();
+            renderThemeModalContent();
+            showToast('Foto latar belakang kustom dihapus', 'fa-trash-can');
+        }
+
+        function updateBgOverlay(val) {
+            state.overlayOpacity = parseFloat(val);
+            document.getElementById('overlayValText').innerText = `${Math.round(val * 100)}%`;
+            saveState();
+            if (state.theme === 'custom') {
+                applyTheme();
+            }
+        }
+
+        function startCountdown() {
+            setInterval(() => {
+                check24hReset();
+                updateCountdownDisplay();
+            }, 1000);
+            updateCountdownDisplay();
+        }
+
+        function check24hReset() {
+            const now = Date.now();
+            const elapsed = now - state.lastResetTimestamp;
+            const period = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+            if (elapsed >= period) {
+                // Hanya reset status centang tugas (completed & completedAt), daftar kegiatan tetap tersimpan
+                state.tasks.forEach(task => {
+                    task.completed = false;
+                    task.completedAt = null;
+                });
+                state.lastResetTimestamp = now;
+                saveState();
+                renderTasks();
+                showToast('Status centang di-reset otomatis! Daftar tugas Anda tetap ada.', 'fa-arrows-rotate');
+            }
+        }
+
+        function updateCountdownDisplay() {
+            const now = Date.now();
+            const elapsed = now - state.lastResetTimestamp;
+            const remaining = Math.max(0, (24 * 60 * 60 * 1000) - elapsed);
+
+            const hours = Math.floor(remaining / (1000 * 60 * 60));
+            const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+            const pad = (n) => n.toString().padStart(2, '0');
+            document.getElementById('countdownTimer').innerText = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+        }
+
+        function renderTabs() {
+            const container = document.getElementById('tabsContainer');
+            container.innerHTML = '';
+
+            state.tabs.forEach(tabName => {
+                const isActive = state.activeTab === tabName;
+                const tabBtn = document.createElement('div');
+                tabBtn.className = `flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition-all whitespace-nowrap ${
+                    isActive 
+                        ? 'bg-amber-700/80 text-amber-50 shadow-md border border-amber-500/40 font-semibold' 
+                        : 'text-amber-200/60 hover:text-amber-100 hover:bg-amber-900/30'
+                }`;
+
+                tabBtn.onclick = () => selectTab(tabName);
+                
+                let html = `<span>${escapeHtml(tabName)}</span>`;
+                
+                // Allow editing and deleting any tab except the mandatory 'Semua' tab
+                if (tabName !== 'Semua') {
+                    html += `<button onclick="openEditTabModal(event, '${escapeHtml(tabName)}')" class="hover:text-amber-300 opacity-60 hover:opacity-100 ml-1.5 text-[10px] p-0.5 rounded transition-all" title="Ubah Nama Tab ${escapeHtml(tabName)}"><i class="fa-solid fa-pen text-[9px]"></i></button>`;
+                    html += `<button onclick="deleteTabDirect(event, '${escapeHtml(tabName)}')" class="hover:text-red-400 opacity-60 hover:opacity-100 ml-1 text-[10px] p-0.5 rounded transition-all" title="Hapus Tab ${escapeHtml(tabName)}"><i class="fa-solid fa-xmark"></i></button>`;
+                }
+
+                tabBtn.innerHTML = html;
+                container.appendChild(tabBtn);
+            });
+
+            document.getElementById('activeTabLabel').innerText = `Tab: ${state.activeTab}`;
+        }
+
+        function selectTab(tabName) {
+            state.activeTab = tabName;
+            renderTabs();
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const container = document.getElementById('taskList');
+            container.innerHTML = '';
+
+            // Filter tasks by active tab
+            const filtered = state.tasks.filter(t => {
+                if (state.activeTab === 'Semua') return true;
+                return t.tab === state.activeTab;
+            });
+
+            // Update Statistics
+            document.getElementById('statTotal').innerText = filtered.length;
+            document.getElementById('statCompleted').innerText = filtered.filter(t => t.completed).length;
+            document.getElementById('statPending').innerText = filtered.filter(t => !t.completed).length;
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="wood-card rounded-2xl p-8 text-center border-dashed border-amber-800/40">
+                        <i class="fa-solid fa-clipboard-check text-3xl text-amber-700/50 mb-2"></i>
+                        <p class="text-xs text-amber-200/50">Tidak ada tugas di tab "${escapeHtml(state.activeTab)}".</p>
+                    </div>
+                `;
+                return;
+            }
+
+            filtered.forEach((task, index) => {
+                const item = document.createElement('div');
+                item.setAttribute('data-task-id', task.id);
+                item.setAttribute('draggable', 'true');
+                item.className = `wood-card rounded-xl p-3 flex items-center justify-between gap-2.5 transition-all hover:border-amber-600/50 ${
+                    task.completed ? 'opacity-70 bg-amber-950/30' : ''
+                }`;
+
+                // Drag & Drop Mouse Events
+                item.ondragstart = (e) => handleDragStart(e, task.id);
+                item.ondragover = (e) => handleDragOver(e);
+                item.ondragenter = (e) => handleDragEnter(e);
+                item.ondragleave = (e) => handleDragLeave(e);
+                item.ondrop = (e) => handleDrop(e, task.id);
+                item.ondragend = (e) => handleDragEnd(e);
+
+                const formattedTime = task.completedAt ? formatDate(task.completedAt) : null;
+                const isFirst = index === 0;
+                const isLast = index === filtered.length - 1;
+
+                item.innerHTML = `
+                    <!-- Pegangan Geser & Panah Naik/Turun -->
+                    <div class="flex items-center gap-1 shrink-0">
+                        <div class="drag-handle touch-none text-amber-300/40 hover:text-amber-300 p-1 cursor-grab active:cursor-grabbing flex items-center justify-center" 
+                             ontouchstart="handleTouchStart(event, '${task.id}')"
+                             ontouchmove="handleTouchMove(event)"
+                             ontouchend="handleTouchEnd(event)"
+                             title="Tahan & geser untuk memindahkan">
+                            <i class="fa-solid fa-grip-vertical text-xs"></i>
+                        </div>
+                        <div class="flex flex-col gap-0.5">
+                            <button onclick="moveTask('${task.id}', 'up')" ${isFirst ? 'disabled class="opacity-20 text-amber-200/20 p-0.5 cursor-not-allowed"' : 'class="text-amber-200/50 hover:text-amber-200 p-0.5 transition-colors"'} title="Geser ke atas">
+                                <i class="fa-solid fa-chevron-up text-[9px]"></i>
+                            </button>
+                            <button onclick="moveTask('${task.id}', 'down')" ${isLast ? 'disabled class="opacity-20 text-amber-200/20 p-0.5 cursor-not-allowed"' : 'class="text-amber-200/50 hover:text-amber-200 p-0.5 transition-colors"'} title="Geser ke bawah">
+                                <i class="fa-solid fa-chevron-down text-[9px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Konten Tugas -->
+                    <div class="flex items-start gap-3 flex-1 min-w-0">
+                        <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                            onchange="toggleTaskDone('${task.id}')"
+                            class="custom-checkbox mt-0.5 shrink-0">
+                        <div class="space-y-1 min-w-0">
+                            <p class="text-sm text-amber-100 font-medium leading-snug break-words ${task.completed ? 'line-through text-amber-300/50' : ''}">
+                                ${escapeHtml(task.title)}
+                            </p>
+                            <div class="flex flex-wrap items-center gap-2 text-[10px]">
+                                <span class="px-2 py-0.5 rounded-md bg-amber-900/50 text-amber-300 border border-amber-700/30 font-medium">
+                                    ${escapeHtml(task.tab)}
+                                </span>
+                                ${task.priority === 'high' ? '<span class="px-2 py-0.5 rounded-md bg-red-950/80 text-red-300 border border-red-800/40 font-semibold">Penting 🔥</span>' : ''}
+                                ${task.completed && formattedTime ? `
+                                    <span class="text-blue-400 font-mono flex items-center gap-1">
+                                        <i class="fa-regular fa-clock text-[9px]"></i> ${formattedTime}
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tombol Aksi -->
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button onclick="openEditTaskModal('${task.id}')" class="text-amber-200/40 hover:text-amber-300 p-1 transition-colors" title="Ubah Nama Tugas">
+                            <i class="fa-solid fa-pen-to-square text-xs"></i>
+                        </button>
+                        <button onclick="deleteTask('${task.id}')" class="text-amber-200/40 hover:text-red-400 p-1 transition-colors" title="Hapus Tugas">
+                            <i class="fa-solid fa-trash-can text-xs"></i>
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(item);
+            });
+        }
+
+        // Variabel & Fungsi Penataan Urutan Tugas (Geser Atas/Bawah)
+        let draggedTaskId = null;
+        let touchDraggedTaskId = null;
+        let touchElement = null;
+        let touchOverElement = null;
+
+        function moveTask(id, direction) {
+            const filtered = state.tasks.filter(t => {
+                if (state.activeTab === 'Semua') return true;
+                return t.tab === state.activeTab;
+            });
+            
+            const filteredIndex = filtered.findIndex(t => t.id === id);
+            if (filteredIndex === -1) return;
+
+            const targetFilteredIndex = direction === 'up' ? filteredIndex - 1 : filteredIndex + 1;
+            if (targetFilteredIndex < 0 || targetFilteredIndex >= filtered.length) return;
+
+            const currentTask = filtered[filteredIndex];
+            const targetTask = filtered[targetFilteredIndex];
+
+            const realIndex1 = state.tasks.findIndex(t => t.id === currentTask.id);
+            const realIndex2 = state.tasks.findIndex(t => t.id === targetTask.id);
+
+            if (realIndex1 !== -1 && realIndex2 !== -1) {
+                const temp = state.tasks[realIndex1];
+                state.tasks[realIndex1] = state.tasks[realIndex2];
+                state.tasks[realIndex2] = temp;
+
+                saveState();
+                renderTasks();
+                showToast(`Tugas digeser ke ${direction === 'up' ? 'atas' : 'bawah'}`, direction === 'up' ? 'fa-arrow-up' : 'fa-arrow-down');
+            }
+        }
+
+        function handleDragStart(e, id) {
+            draggedTaskId = id;
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', id);
+            e.currentTarget.classList.add('opacity-40', 'scale-[0.99]', 'border-amber-500/50');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleDragEnter(e) {
+            e.preventDefault();
+            const item = e.currentTarget;
+            item.classList.add('border-amber-500', 'bg-amber-900/40');
+        }
+
+        function handleDragLeave(e) {
+            const item = e.currentTarget;
+            item.classList.remove('border-amber-500', 'bg-amber-900/40');
+        }
+
+        function handleDrop(e, targetId) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const item = e.currentTarget;
+            item.classList.remove('border-amber-500', 'bg-amber-900/40');
+
+            if (!draggedTaskId || draggedTaskId === targetId) return;
+
+            const fromIndex = state.tasks.findIndex(t => t.id === draggedTaskId);
+            const toIndex = state.tasks.findIndex(t => t.id === targetId);
+
+            if (fromIndex !== -1 && toIndex !== -1) {
+                const [movedTask] = state.tasks.splice(fromIndex, 1);
+                state.tasks.splice(toIndex, 0, movedTask);
+                saveState();
+                renderTasks();
+                showToast('Urutan tugas diperbarui', 'fa-arrows-up-down');
+            }
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('opacity-40', 'scale-[0.99]', 'border-amber-500/50');
+            draggedTaskId = null;
+        }
+
+        function handleTouchStart(e, id) {
+            touchDraggedTaskId = id;
+            touchElement = e.currentTarget.closest('[data-task-id]');
+            if (touchElement) {
+                touchElement.classList.add('opacity-50', 'bg-amber-900/50');
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (!touchDraggedTaskId) return;
+            const touch = e.touches[0];
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            if (!target) return;
+
+            const taskCard = target.closest('[data-task-id]');
+            if (taskCard && taskCard !== touchElement) {
+                if (touchOverElement && touchOverElement !== taskCard) {
+                    touchOverElement.classList.remove('border-amber-500', 'bg-amber-900/40');
+                }
+                touchOverElement = taskCard;
+                touchOverElement.classList.add('border-amber-500', 'bg-amber-900/40');
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (!touchDraggedTaskId) return;
+
+            if (touchElement) {
+                touchElement.classList.remove('opacity-50', 'bg-amber-900/50');
+            }
+
+            if (touchOverElement) {
+                const targetId = touchOverElement.getAttribute('data-task-id');
+                touchOverElement.classList.remove('border-amber-500', 'bg-amber-900/40');
+
+                if (targetId && targetId !== touchDraggedTaskId) {
+                    const fromIndex = state.tasks.findIndex(t => t.id === touchDraggedTaskId);
+                    const toIndex = state.tasks.findIndex(t => t.id === targetId);
+
+                    if (fromIndex !== -1 && toIndex !== -1) {
+                        const [movedTask] = state.tasks.splice(fromIndex, 1);
+                        state.tasks.splice(toIndex, 0, movedTask);
+                        saveState();
+                        renderTasks();
+                        showToast('Urutan tugas diperbarui', 'fa-arrows-up-down');
+                    }
+                }
+            }
+
+            touchDraggedTaskId = null;
+            touchElement = null;
+            touchOverElement = null;
+        }
+
+        function handleAddTask(e) {
+            e.preventDefault();
+            const input = document.getElementById('taskInput');
+            const prioritySelect = document.getElementById('prioritySelect');
+            const title = input.value.trim();
+
+            if (!title) return;
+
+            const newTask = {
+                id: Date.now().toString(),
+                title: title,
+                tab: state.activeTab === 'Semua' ? 'Harian' : state.activeTab,
+                completed: false,
+                priority: prioritySelect.value,
+                completedAt: null
+            };
+
+            state.tasks.unshift(newTask);
+            saveState();
+            renderTasks();
+
+            input.value = '';
+            showToast('Tugas baru berhasil ditambahkan', 'fa-circle-plus');
+        }
+
+        function toggleTaskDone(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                if (task.completed) {
+                    task.completedAt = Date.now();
+                    playCheckSound();
+                    showToast('Tugas diselesaikan!', 'fa-circle-check');
+                } else {
+                    task.completedAt = null;
+                    playUncheckSound();
+                }
+                saveState();
+                renderTasks();
+            }
+        }
+
+        function deleteTask(id) {
+            state.tasks = state.tasks.filter(t => t.id !== id);
+            saveState();
+            renderTasks();
+            showToast('Tugas dihapus', 'fa-trash-can');
+        }
+
+        function openEditTaskModal(id) {
+            const task = state.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            editingTaskId = id;
+            const input = document.getElementById('editTaskInput');
+            input.value = task.title;
+            
+            document.getElementById('editTaskModal').classList.remove('hidden');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeEditTaskModal() {
+            editingTaskId = null;
+            document.getElementById('editTaskModal').classList.add('hidden');
+            document.getElementById('editTaskInput').value = '';
+        }
+
+        function confirmEditTask() {
+            if (!editingTaskId) return;
+            const input = document.getElementById('editTaskInput');
+            const newTitle = input.value.trim();
+
+            if (!newTitle) {
+                showToast('Nama tugas tidak boleh kosong', 'fa-triangle-exclamation');
+                return;
+            }
+
+            const task = state.tasks.find(t => t.id === editingTaskId);
+            if (task) {
+                task.title = newTitle;
+                saveState();
+                renderTasks();
+                showToast('Nama tugas berhasil diperbarui', 'fa-pen-to-square');
+            }
+
+            closeEditTaskModal();
+        }
+
+        function openAddTabModal() {
+            document.getElementById('addTabModal').classList.remove('hidden');
+            document.getElementById('newTabInput').focus();
+        }
+
+        function closeAddTabModal() {
+            document.getElementById('addTabModal').classList.add('hidden');
+            document.getElementById('newTabInput').value = '';
+        }
+
+        function confirmAddTab() {
+            const input = document.getElementById('newTabInput');
+            const name = input.value.trim();
+
+            if (!name) return;
+
+            if (state.tabs.includes(name)) {
+                showToast('Nama tab sudah ada', 'fa-triangle-exclamation');
+                return;
+            }
+
+            state.tabs.push(name);
+            state.activeTab = name;
+            saveState();
+            renderTabs();
+            renderTasks();
+            closeAddTabModal();
+            showToast(`Tab "${name}" berhasil dibuat`, 'fa-folder-plus');
+        }
+
+        function openEditTabModal(e, tabName) {
+            if (e) e.stopPropagation();
+            if (tabName === 'Semua') return;
+
+            editingTabName = tabName;
+            const input = document.getElementById('editTabInput');
+            input.value = tabName;
+            
+            document.getElementById('editTabModal').classList.remove('hidden');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        function closeEditTabModal() {
+            editingTabName = null;
+            document.getElementById('editTabModal').classList.add('hidden');
+            document.getElementById('editTabInput').value = '';
+        }
+
+        function confirmEditTab() {
+            if (!editingTabName) return;
+            const input = document.getElementById('editTabInput');
+            const newTabName = input.value.trim();
+
+            if (!newTabName) {
+                showToast('Nama tab tidak boleh kosong', 'fa-triangle-exclamation');
+                return;
+            }
+
+            if (newTabName !== editingTabName && state.tabs.includes(newTabName)) {
+                showToast('Nama tab sudah ada', 'fa-triangle-exclamation');
+                return;
+            }
+
+            const oldName = editingTabName;
+
+            // Update tab list
+            const index = state.tabs.indexOf(oldName);
+            if (index !== -1) {
+                state.tabs[index] = newTabName;
+            }
+
+            // Update all tasks associated with old tab name
+            state.tasks.forEach(t => {
+                if (t.tab === oldName) {
+                    t.tab = newTabName;
+                }
+            });
+
+            // Update active tab if it was the renamed one
+            if (state.activeTab === oldName) {
+                state.activeTab = newTabName;
+            }
+
+            saveState();
+            renderTabs();
+            renderTasks();
+            closeEditTabModal();
+            showToast(`Nama tab diubah menjadi "${newTabName}"`, 'fa-pen-to-square');
+        }
+
+        function deleteTabDirect(e, tabName) {
+            e.stopPropagation();
+            state.tabs = state.tabs.filter(t => t !== tabName);
+            
+            // Re-assign tasks in this tab to 'Semua'
+            state.tasks.forEach(t => {
+                if (t.tab === tabName) t.tab = 'Semua';
+            });
+
+            if (state.activeTab === tabName) state.activeTab = 'Semua';
+            saveState();
+            renderTabs();
+            renderTasks();
+            showToast(`Tab "${tabName}" berhasil dihapus`, 'fa-trash-can');
+        }
+
+        function openResetModal() {
+            document.getElementById('resetModal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('resetModal').classList.add('hidden');
+        }
+
+        function confirmReset() {
+            // Hanya reset status centang tugas, daftar kegiatan tetap tersimpan
+            state.tasks.forEach(t => {
+                t.completed = false;
+                t.completedAt = null;
+            });
+            state.lastResetTimestamp = Date.now();
+            saveState();
+            renderTasks();
+            closeResetModal();
+            showToast('Status centang berhasil di-reset (Daftar tugas tetap ada)', 'fa-arrows-rotate');
+        }
+
+        async function generateAIQuote(category = '') {
+            const quoteLoader = document.getElementById('quoteLoader');
+            const quoteBox = document.getElementById('quoteBox');
+            const quoteText = document.getElementById('quoteText');
+            const quoteAuthor = document.getElementById('quoteAuthor');
+
+            quoteBox.classList.add('hidden');
+            quoteLoader.classList.remove('hidden');
+
+            const apiKey = ""; // Canvas runtime auto-fills key if needed
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+            let promptTopic = "motivasi kerja, ketekunan, dan sukses karir";
+            if (category === 'fokus') promptTopic = "fokus pada tujuan dan menghindari distraksi kerja";
+            if (category === 'tangguh') promptTopic = "ketangguhan mental menghadapi tantangan kerja";
+            if (category === 'karir') promptTopic = "pengembangan karir dan dedikasi profesional";
+
+            const userPrompt = `Berikan 1 kalimat kata-kata motivasi yang inspiratif dan mendalam tentang ${promptTopic} dalam Bahasa Indonesia. Sertakan juga nama pengutip/tokoh bijak yang sesuai.`;
+
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: userPrompt }] }],
+                systemInstruction: {
+                    parts: [{ text: "Anda adalah motivator profesional. Hasilkan kutipan ringkas (1-2 kalimat) yang menggugah semangat kerja dalam Bahasa Indonesia. Format output harus secara ketat mengikuti JSON schema yang diberikan." }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            quote: { type: "STRING" },
+                            author: { type: "STRING" }
+                        },
+                        required: ["quote", "author"]
+                    }
+                }
+            };
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error('API Request Error');
+
+                const result = await response.json();
+                const jsonText = result.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (jsonText) {
+                    const parsed = JSON.parse(jsonText);
+                    quoteText.innerText = `"${parsed.quote}"`;
+                    quoteAuthor.innerText = `— ${parsed.author || 'Anonim'}`;
+                } else {
+                    throw new Error('Empty payload');
+                }
+            } catch (err) {
+                // Fallback local quotes if API fails or offline
+                const randomQuote = fallbackQuotes[Math.floor(Math.random() * fallbackQuotes.length)];
+                quoteText.innerText = `"${randomQuote.text}"`;
+                quoteAuthor.innerText = `— ${randomQuote.author}`;
+            } finally {
+                quoteLoader.classList.add('hidden');
+                quoteBox.classList.remove('hidden');
+            }
+        }
+
+        function copyQuote() {
+            const text = document.getElementById('quoteText').innerText;
+            const author = document.getElementById('quoteAuthor').innerText;
+            const fullText = `${text} ${author}`;
+
+            const el = document.createElement('textarea');
+            el.value = fullText;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            showToast('Kata motivasi disalin!', 'fa-copy');
+        }
+
+        function formatDate(timestamp) {
+            const d = new Date(timestamp);
+            const date = d.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' });
+            const time = d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            return `${date}, ${time}`;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;")
+                      .replace(/'/g, "&#039;");
+        }
+
+        function showToast(msg, iconClass = 'fa-circle-check') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = msg;
+            toastIcon.className = `fa-solid ${iconClass} text-blue-400`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
